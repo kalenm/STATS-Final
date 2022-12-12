@@ -5,9 +5,17 @@ date: "Dec 1, 2022"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code.
+```{r}
+setwd("C:/Users/Olympos/Documents/Programs/R/STATS-Final")
+```
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*.
+# Introduction
+
+This is a study that focused on comparing different bootstrap methods with different amounts of noise in each system. The bootstrap methods explored in this research are resampling cases, parametric bootstrap, resampling errors, smoothed bootstrap, and multiplier wild bootstrap. Then the four data sets are based of a linear model with different noises that are added into it. The different noise simulations used are, standard normal noise, heavy tail noise, skewed noise, and heteroscedastic noise. The write up will review each of the four different linear models and what bootstrap method works best for it, and comparison to the others.
+
+### Note about data handling
+
+In this study the library doParallel is used to help minimize the time it takes to generate each bootstrap. The code supplied both within this write up as well as the code that generates the data is able to be used on any computer, but the time returns may not be as noticeable depending on how many cores are on your computer. The computer used in this simulation has 16 cores and 32 threads which allowed for a large decrease in time taken, but you may not see the same. If you were looking for an even larger decrease in the total time to allow for larger data sets to be generated and modeled you could look at GPU acceleration, but that is outside the scope of this study.
 
 ```{r}
 plot(cars)

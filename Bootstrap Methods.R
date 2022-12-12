@@ -7,8 +7,7 @@ registerDoParallel(cores = CL)
 
 ndata = 5000
 nboot = 2500
-sims = 250
-stest = 25
+sim = 250
 b0 = 1
 b1 = 3
 x = runif(ndata)
@@ -32,20 +31,19 @@ dataTail<-data.frame(x,yTail)
 dataSkew<-data.frame(x,ySkew)
 dataWide<-data.frame(x,yWide)
 
-
-
+write.csv(dataNorm, file = 'dataNorm.csv', row.names = F)
+write.csv(dataTail, file = 'dataTail.csv', row.names = F)
+write.csv(dataSkew, file = 'dataSkew.csv', row.names = F)
+write.csv(dataWide, file = 'dataWide.csv', row.names = F)
 
 
 bootstrap = function(df, n){
   foreach(i=1:n, .combine=c) %dopar% {
     bootstrap_data<-df[sample(nrow(df),nrow(df),replace=T),]
-    # head(bootstrap_data)
     unname(lm(bootstrap_data[,2]~bootstrap_data[,1])$coef[2])
   }
 }
 
-
-# variance is equal to (summary(mod)$sigma)^2.
 
 parametric = function(df, n){
   mod = lm(df[,2] ~ df[,1])
@@ -99,3 +97,52 @@ wildstrap = function(df, n){
 
   }
 }
+
+simNormBoot = replicate(sim, bootstrap(dataNorm, nboot))
+simNormPara = replicate(sim, parametric(dataNorm, nboot))
+simNormRsam = replicate(sim, resampling(dataNorm, nboot))
+simNormSmth = replicate(sim, smoothed(dataNorm, nboot))
+simNormWild = replicate(sim, wildstrap(dataNorm, nboot))
+
+simTailBoot = replicate(sim, bootstrap(dataTail, nboot))
+simTailPara = replicate(sim, parametric(dataTail, nboot))
+simTailRsam = replicate(sim, resampling(dataTail, nboot))
+simTailSmth = replicate(sim, smoothed(dataTail, nboot))
+simTailWild = replicate(sim, wildstrap(dataTail, nboot))
+
+simSkewBoot = replicate(sim, bootstrap(dataSkew, nboot))
+simSkewPara = replicate(sim, parametric(dataSkew, nboot))
+simSkewRsam = replicate(sim, resampling(dataSkew, nboot))
+simSkewSmth = replicate(sim, smoothed(dataSkew, nboot))
+simSkewWild = replicate(sim, wildstrap(dataSkew, nboot))
+
+simWideBoot = replicate(sim, bootstrap(dataWide, nboot))
+simWidePara = replicate(sim, parametric(dataWide, nboot))
+simWideRsam = replicate(sim, resampling(dataWide, nboot))
+simWideSmth = replicate(sim, smoothed(dataWide, nboot))
+simWideWild = replicate(sim, wildstrap(dataWide, nboot))
+
+
+write.csv(simNormBoot, file = 'simNormBoot.csv', row.names = F)
+write.csv(simNormPara, file = 'simNormPara.csv', row.names = F)
+write.csv(simNormRsam, file = 'simNormRsam.csv', row.names = F)
+write.csv(simNormSmth, file = 'simNormSmth.csv', row.names = F)
+write.csv(simNormWild, file = 'simNormWild.csv', row.names = F)
+
+write.csv(simTailBoot, file = 'simTailBoot.csv', row.names = F)
+write.csv(simTailPara, file = 'simTailPara.csv', row.names = F)
+write.csv(simTailRsam, file = 'simTailRsam.csv', row.names = F)
+write.csv(simTailSmth, file = 'simTailSmth.csv', row.names = F)
+write.csv(simTailWild, file = 'simTailWild.csv', row.names = F)
+
+write.csv(simSkewBoot, file = 'simSkewBoot.csv', row.names = F)
+write.csv(simSkewPara, file = 'simSkewPara.csv', row.names = F)
+write.csv(simSkewRsam, file = 'simSkewRsam.csv', row.names = F)
+write.csv(simSkewSmth, file = 'simSkewSmth.csv', row.names = F)
+write.csv(simSkewWild, file = 'simSkewWild.csv', row.names = F)
+
+write.csv(simWideBoot, file = 'simWideBoot.csv', row.names = F)
+write.csv(simWidePara, file = 'simWidePara.csv', row.names = F)
+write.csv(simWideRsam, file = 'simWideRsam.csv', row.names = F)
+write.csv(simWideSmth, file = 'simWideSmth.csv', row.names = F)
+write.csv(simWideWild, file = 'simWideWild.csv', row.names = F)

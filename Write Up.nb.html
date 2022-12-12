@@ -1683,17 +1683,23 @@ overflow-y: auto;
 border: 1px solid #ddd;
 border-radius: 4px;
 }
-.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-content: "\e259";
+.tabset-dropdown > .nav-tabs > li.active:before {
+content: "";
 font-family: 'Glyphicons Halflings';
 display: inline-block;
 padding: 10px;
 border-right: 1px solid #ddd;
 }
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-content: "\e258";
-font-family: 'Glyphicons Halflings';
+content: "";
 border: none;
+}
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+content: "";
+font-family: 'Glyphicons Halflings';
+display: inline-block;
+padding: 10px;
+border-right: 1px solid #ddd;
 }
 .tabset-dropdown > .nav-tabs > li.active {
 display: block;
@@ -1756,16 +1762,43 @@ noise</h1>
 
 
 <!-- rnb-text-begin -->
-<p>This is an <a href="http://rmarkdown.rstudio.com">R Markdown</a>
-Notebook. When you execute code within the notebook, the results appear
-beneath the code.</p>
-<p>Try executing this chunk by clicking the <em>Run</em> button within
-the chunk or by placing your cursor inside it and pressing
-<em>Cmd+Shift+Enter</em>.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucGxvdChjYXJzKVxuYGBgIn0= -->
-<pre class="r"><code>plot(cars)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2V0d2QoXCJDOi9Vc2Vycy9PbHltcG9zL0RvY3VtZW50cy9Qcm9ncmFtcy9SL1NUQVRTLUZpbmFsXCIpXG5gYGAifQ== -->
+<pre class="r"><code>setwd(&quot;C:/Users/Olympos/Documents/Programs/R/STATS-Final&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>This is a study that focused on comparing different bootstrap methods
+with different amounts of noise in each system. The bootstrap methods
+explored in this research are resampling cases, parametric bootstrap,
+resampling errors, smoothed bootstrap, and multiplier wild bootstrap.
+Then the four data sets are based of a linear model with different
+noises that are added into it. The different noise simulations used are,
+standard normal noise, heavy tail noise, skewed noise, and
+heteroscedastic noise. The write up will review each of the four
+different linear models and what bootstrap method works best for it, and
+comparison to the others.</p>
+<div id="note-about-data-handling" class="section level3">
+<h3>Note about data handling</h3>
+<p>In this study the library doParallel is used to help minimize the
+time it takes to generate each bootstrap. The code supplied both within
+this write up as well as the code that generates the data is able to be
+used on any computer, but the time returns may not be as noticeable
+depending on how many cores are on your computer. The computer used in
+this simulation has 16 cores and 32 threads which allowed for a large
+decrease in time taken, but you may not see the same. If you were
+looking for an even larger decrease in the total time to allow for
+larger data sets to be generated and modeled you could look at GPU
+acceleration, but that is outside the scope of this study.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxucGxvdChjYXJzKVxuYGBgXG5gYGAifQ== -->
+<pre class="r"><code>```r
+plot(cars)</code></pre>
+<p>```</p>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
@@ -1779,8 +1812,10 @@ editor. Consequently, unlike <em>Knit</em>, <em>Preview</em> does not
 run any R code chunks. Instead, the output of the chunk when it was last
 run in the editor is displayed.</p>
 <!-- rnb-text-end -->
+</div>
+</div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiQm9vdHN0cmFwIG1ldGhvZHMgZm9yIGxpbmVhciBtb2RlbHMgd2l0aCBub2lzZSIKYXV0aG9yOiAiS2FsZW4gTXVsbGluIgpkYXRlOiAiRGVjIDEsIDIwMjIiCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KClRoaXMgaXMgYW4gW1IgTWFya2Rvd25dKGh0dHA6Ly9ybWFya2Rvd24ucnN0dWRpby5jb20pIE5vdGVib29rLiBXaGVuIHlvdSBleGVjdXRlIGNvZGUgd2l0aGluIHRoZSBub3RlYm9vaywgdGhlIHJlc3VsdHMgYXBwZWFyIGJlbmVhdGggdGhlIGNvZGUuCgpUcnkgZXhlY3V0aW5nIHRoaXMgY2h1bmsgYnkgY2xpY2tpbmcgdGhlICpSdW4qIGJ1dHRvbiB3aXRoaW4gdGhlIGNodW5rIG9yIGJ5IHBsYWNpbmcgeW91ciBjdXJzb3IgaW5zaWRlIGl0IGFuZCBwcmVzc2luZyAqQ21kK1NoaWZ0K0VudGVyKi4KCmBgYHtyfQpwbG90KGNhcnMpCmBgYAoKQWRkIGEgbmV3IGNodW5rIGJ5IGNsaWNraW5nIHRoZSAqSW5zZXJ0IENodW5rKiBidXR0b24gb24gdGhlIHRvb2xiYXIgb3IgYnkgcHJlc3NpbmcgKkNtZCtPcHRpb24rSSouCgpXaGVuIHlvdSBzYXZlIHRoZSBub3RlYm9vaywgYW4gSFRNTCBmaWxlIGNvbnRhaW5pbmcgdGhlIGNvZGUgYW5kIG91dHB1dCB3aWxsIGJlIHNhdmVkIGFsb25nc2lkZSBpdCAoY2xpY2sgdGhlICpQcmV2aWV3KiBidXR0b24gb3IgcHJlc3MgKkNtZCtTaGlmdCtLKiB0byBwcmV2aWV3IHRoZSBIVE1MIGZpbGUpLgoKVGhlIHByZXZpZXcgc2hvd3MgeW91IGEgcmVuZGVyZWQgSFRNTCBjb3B5IG9mIHRoZSBjb250ZW50cyBvZiB0aGUgZWRpdG9yLiBDb25zZXF1ZW50bHksIHVubGlrZSAqS25pdCosICpQcmV2aWV3KiBkb2VzIG5vdCBydW4gYW55IFIgY29kZSBjaHVua3MuIEluc3RlYWQsIHRoZSBvdXRwdXQgb2YgdGhlIGNodW5rIHdoZW4gaXQgd2FzIGxhc3QgcnVuIGluIHRoZSBlZGl0b3IgaXMgZGlzcGxheWVkLgo=</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIkJvb3RzdHJhcCBtZXRob2RzIGZvciBsaW5lYXIgbW9kZWxzIHdpdGggbm9pc2UiDQphdXRob3I6ICJLYWxlbiBNdWxsaW4iDQpkYXRlOiAiRGVjIDEsIDIwMjIiDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQpgYGB7cn0NCnNldHdkKCJDOi9Vc2Vycy9PbHltcG9zL0RvY3VtZW50cy9Qcm9ncmFtcy9SL1NUQVRTLUZpbmFsIikNCmBgYA0KDQojIEludHJvZHVjdGlvbg0KDQpUaGlzIGlzIGEgc3R1ZHkgdGhhdCBmb2N1c2VkIG9uIGNvbXBhcmluZyBkaWZmZXJlbnQgYm9vdHN0cmFwIG1ldGhvZHMgd2l0aCBkaWZmZXJlbnQgYW1vdW50cyBvZiBub2lzZSBpbiBlYWNoIHN5c3RlbS4gVGhlIGJvb3RzdHJhcCBtZXRob2RzIGV4cGxvcmVkIGluIHRoaXMgcmVzZWFyY2ggYXJlIHJlc2FtcGxpbmcgY2FzZXMsIHBhcmFtZXRyaWMgYm9vdHN0cmFwLCByZXNhbXBsaW5nIGVycm9ycywgc21vb3RoZWQgYm9vdHN0cmFwLCBhbmQgbXVsdGlwbGllciB3aWxkIGJvb3RzdHJhcC4gVGhlbiB0aGUgZm91ciBkYXRhIHNldHMgYXJlIGJhc2VkIG9mIGEgbGluZWFyIG1vZGVsIHdpdGggZGlmZmVyZW50IG5vaXNlcyB0aGF0IGFyZSBhZGRlZCBpbnRvIGl0LiBUaGUgZGlmZmVyZW50IG5vaXNlIHNpbXVsYXRpb25zIHVzZWQgYXJlLCBzdGFuZGFyZCBub3JtYWwgbm9pc2UsIGhlYXZ5IHRhaWwgbm9pc2UsIHNrZXdlZCBub2lzZSwgYW5kIGhldGVyb3NjZWRhc3RpYyBub2lzZS4gVGhlIHdyaXRlIHVwIHdpbGwgcmV2aWV3IGVhY2ggb2YgdGhlIGZvdXIgZGlmZmVyZW50IGxpbmVhciBtb2RlbHMgYW5kIHdoYXQgYm9vdHN0cmFwIG1ldGhvZCB3b3JrcyBiZXN0IGZvciBpdCwgYW5kIGNvbXBhcmlzb24gdG8gdGhlIG90aGVycy4NCg0KIyMjIE5vdGUgYWJvdXQgZGF0YSBoYW5kbGluZw0KDQpJbiB0aGlzIHN0dWR5IHRoZSBsaWJyYXJ5IGRvUGFyYWxsZWwgaXMgdXNlZCB0byBoZWxwIG1pbmltaXplIHRoZSB0aW1lIGl0IHRha2VzIHRvIGdlbmVyYXRlIGVhY2ggYm9vdHN0cmFwLiBUaGUgY29kZSBzdXBwbGllZCBib3RoIHdpdGhpbiB0aGlzIHdyaXRlIHVwIGFzIHdlbGwgYXMgdGhlIGNvZGUgdGhhdCBnZW5lcmF0ZXMgdGhlIGRhdGEgaXMgYWJsZSB0byBiZSB1c2VkIG9uIGFueSBjb21wdXRlciwgYnV0IHRoZSB0aW1lIHJldHVybnMgbWF5IG5vdCBiZSBhcyBub3RpY2VhYmxlIGRlcGVuZGluZyBvbiBob3cgbWFueSBjb3JlcyBhcmUgb24geW91ciBjb21wdXRlci4gVGhlIGNvbXB1dGVyIHVzZWQgaW4gdGhpcyBzaW11bGF0aW9uIGhhcyAxNiBjb3JlcyBhbmQgMzIgdGhyZWFkcyB3aGljaCBhbGxvd2VkIGZvciBhIGxhcmdlIGRlY3JlYXNlIGluIHRpbWUgdGFrZW4sIGJ1dCB5b3UgbWF5IG5vdCBzZWUgdGhlIHNhbWUuIElmIHlvdSB3ZXJlIGxvb2tpbmcgZm9yIGFuIGV2ZW4gbGFyZ2VyIGRlY3JlYXNlIGluIHRoZSB0b3RhbCB0aW1lIHRvIGFsbG93IGZvciBsYXJnZXIgZGF0YSBzZXRzIHRvIGJlIGdlbmVyYXRlZCBhbmQgbW9kZWxlZCB5b3UgY291bGQgbG9vayBhdCBHUFUgYWNjZWxlcmF0aW9uLCBidXQgdGhhdCBpcyBvdXRzaWRlIHRoZSBzY29wZSBvZiB0aGlzIHN0dWR5Lg0KDQpgYGB7cn0NCnBsb3QoY2FycykNCmBgYA0KDQpBZGQgYSBuZXcgY2h1bmsgYnkgY2xpY2tpbmcgdGhlICpJbnNlcnQgQ2h1bmsqIGJ1dHRvbiBvbiB0aGUgdG9vbGJhciBvciBieSBwcmVzc2luZyAqQ21kK09wdGlvbitJKi4NCg0KV2hlbiB5b3Ugc2F2ZSB0aGUgbm90ZWJvb2ssIGFuIEhUTUwgZmlsZSBjb250YWluaW5nIHRoZSBjb2RlIGFuZCBvdXRwdXQgd2lsbCBiZSBzYXZlZCBhbG9uZ3NpZGUgaXQgKGNsaWNrIHRoZSAqUHJldmlldyogYnV0dG9uIG9yIHByZXNzICpDbWQrU2hpZnQrSyogdG8gcHJldmlldyB0aGUgSFRNTCBmaWxlKS4NCg0KVGhlIHByZXZpZXcgc2hvd3MgeW91IGEgcmVuZGVyZWQgSFRNTCBjb3B5IG9mIHRoZSBjb250ZW50cyBvZiB0aGUgZWRpdG9yLiBDb25zZXF1ZW50bHksIHVubGlrZSAqS25pdCosICpQcmV2aWV3KiBkb2VzIG5vdCBydW4gYW55IFIgY29kZSBjaHVua3MuIEluc3RlYWQsIHRoZSBvdXRwdXQgb2YgdGhlIGNodW5rIHdoZW4gaXQgd2FzIGxhc3QgcnVuIGluIHRoZSBlZGl0b3IgaXMgZGlzcGxheWVkLg0K</div>
 
 
 
