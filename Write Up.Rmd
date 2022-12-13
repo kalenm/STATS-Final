@@ -1,28 +1,312 @@
 ---
-title: "Bootstrap methods for linear models with noise"
+title: "Bootstrap methods for approximating linear models with differing noise"
 author: "Kalen Mullin"
 date: "Dec 1, 2022"
 output: html_notebook
 ---
 
 ```{r}
-setwd("C:/Users/Olympos/Documents/Programs/R/STATS-Final")
+if(.Platform$OS.type == 'unix'){ 
+  setwd("/Users/kalenmullin/Programming/R/Final/GitHub")
+}else{
+  setwd("C:/Users/Olympos/Documents/Programs/R/STATS-Final") 
+}
+
+set.seed(87539319)
+CL = detectCores() - 2
+registerDoParallel(cores = CL)
+sim = 250
+
+dataNorm = read.csv( file = 'dataNorm.csv')
+dataTail = read.csv( file = 'dataTail.csv')
+dataSkew = read.csv( file = 'dataSkew.csv')
+dataWide = read.csv( file = 'dataWide.csv')
+
+simNormBoot = read.csv( file = 'simNormBoot.csv')
+simNormPara = read.csv( file = 'simNormPara.csv')
+simNormRsam = read.csv( file = 'simNormRsam.csv')
+simNormSmth = read.csv( file = 'simNormSmth.csv')
+simNormWild = read.csv( file = 'simNormWild.csv')
+
+simTailBoot = read.csv( file = 'simTailBoot.csv')
+simTailPara = read.csv( file = 'simTailPara.csv')
+simTailRsam = read.csv( file = 'simTailRsam.csv')
+simTailSmth = read.csv( file = 'simTailSmth.csv')
+simTailWild = read.csv( file = 'simTailWild.csv')
+
+simSkewBoot = read.csv( file = 'simSkewBoot.csv')
+simSkewPara = read.csv( file = 'simSkewPara.csv')
+simSkewRsam = read.csv( file = 'simSkewRsam.csv')
+simSkewSmth = read.csv( file = 'simSkewSmth.csv')
+simSkewWild = read.csv( file = 'simSkewWild.csv')
+
+simWideBoot = read.csv( file = 'simWideBoot.csv')
+simWidePara = read.csv( file = 'simWidePara.csv')
+simWideRsam = read.csv( file = 'simWideRsam.csv')
+simWideSmth = read.csv( file = 'simWideSmth.csv')
+simWideWild = read.csv( file = 'simWideWild.csv')
 ```
 
 # Introduction
 
-This is a study that focused on comparing different bootstrap methods with different amounts of noise in each system. The bootstrap methods explored in this research are resampling cases, parametric bootstrap, resampling errors, smoothed bootstrap, and multiplier wild bootstrap. Then the four data sets are based of a linear model with different noises that are added into it. The different noise simulations used are, standard normal noise, heavy tail noise, skewed noise, and heteroscedastic noise. The write up will review each of the four different linear models and what bootstrap method works best for it, and comparison to the others.
+This is a study that focused on comparing different bootstrap methods with different amounts of noise in each system. The bootstrap methods explored in this research are resampling cases(Boot), parametric bootstrap(Para), resampling errors(Rsam), smoothed bootstrap(Smth), and multiplier wild bootstrap(Wild). Then the four data sets are based of a linear model, with an intercept of 1 and a slope of 3, and with different noises that are added into it. The different noise simulations used are, standard normal noise, heavy tail noise, skewed noise, and heteroscedastic noise. The write up will review each of the four different linear models and what bootstrap method works best for it, and comparison to the others. I am comparing the coefficients that I generated for each bootstrap method, and whether they fit within the given confidence interval. The data that I kept from each bootstrap iteration was the estimate of the slope. Along with the generated estimates I also have copies of the linear models to generate the confidence interval for them.
 
 ### Note about data handling
 
 In this study the library doParallel is used to help minimize the time it takes to generate each bootstrap. The code supplied both within this write up as well as the code that generates the data is able to be used on any computer, but the time returns may not be as noticeable depending on how many cores are on your computer. The computer used in this simulation has 16 cores and 32 threads which allowed for a large decrease in time taken, but you may not see the same. If you were looking for an even larger decrease in the total time to allow for larger data sets to be generated and modeled you could look at GPU acceleration, but that is outside the scope of this study.
 
+# Standard Normal Noise
+
+To begin we will look at a linear model that has standard normal noise that has been mixed in with the data. We can start by looking at a graph of the data to see how much the data has been changed.
+
 ```{r}
-plot(cars)
+plot(dataNorm[,1],dataNorm[,2], xlab = 'x', ylab = 'y with noise norm')
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+From this we can see there is a large amount of variation in the data, but that the original linear model can be observed to a lesser degree. It is clear that the noise we introduced into the simulation has changed our data. Along with seeing a visual representation for our code, we can look at the confidence interval for the slope.
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file).
+```{r}
+CINorm = confint(lm(dataNorm[,2] ~ dataNorm[,1]))
+CINorm[2,]
+```
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+We can see from the profile confidence interval that our data is not so skewed that the true value for our slope interval still lies within the confidence interval, so this confidence interval can be used for comparing our bootstrap methods. To start we will find the percentage of bootstrap replicates per simulation fell within our interval. We can then use these percents to draw our conclusions from the data.
+
+```{r}
+ConfNormBoot = foreach(i = 1:sim, .combine = c) %do%{
+  mean(CINorm[2,1] <= simNormBoot[,i] & simNormBoot[,i] <= CINorm[2,2])
+}
+ConfNormBoot = ConfNormBoot * 100
+
+ConfNormPara = foreach(i = 1:sim, .combine = c) %do%{
+  mean(CINorm[2,1] <= simNormPara[,i] & simNormPara[,i] <= CINorm[2,2])
+}
+ConfNormPara = ConfNormPara * 100
+
+ConfNormRsam = foreach(i = 1:sim, .combine = c) %do%{
+  mean(CINorm[2,1] <= simNormRsam[,i] & simNormRsam[,i] <= CINorm[2,2])
+}
+ConfNormRsam = ConfNormRsam * 100
+
+ConfNormSmth = foreach(i = 1:sim, .combine = c) %do%{
+  mean(CINorm[2,1] <= simNormSmth[,i] & simNormSmth[,i] <= CINorm[2,2])
+}
+ConfNormSmth = ConfNormSmth * 100
+
+ConfNormWild = foreach(i = 1:sim, .combine = c) %do%{
+  mean(CINorm[2,1] <= simNormWild[,i] & simNormWild[,i] <= CINorm[2,2])
+}
+
+ConfNormWild = ConfNormWild * 100
+
+hist(ConfNormBoot, main = 'Percentages of NormBoot within CI')
+hist(ConfNormPara, main = 'Percentages of NormPara within CI')
+hist(ConfNormRsam, main = 'Percentages of NormRsam within CI')
+hist(ConfNormSmth, main = 'Percentages of NormSmth within CI')
+hist(ConfNormWild, main = 'Percentages of NormWild within CI')
+```
+
+We will start by comparing the histograms of each of the percentages. We can see from the histograms that the average for each histogram is around 95%, and if we test to find the mean of each we find that,
+
+```{r}
+mean(ConfNormBoot)
+mean(ConfNormPara)
+mean(ConfNormRsam)
+mean(ConfNormSmth)
+mean(ConfNormWild)
+```
+
+The mean of every simulation is over 95%, which does mean that any of the bootstrap methods are accurate enough to be used. A final check that we can perform is the standard deviation of each of the values.
+
+```{r}
+sd(ConfNormBoot)
+sd(ConfNormPara)
+sd(ConfNormRsam)
+sd(ConfNormSmth)
+sd(ConfNormWild)
+```
+
+This does not actually help to figure out which bootstrap method although it is a useful method that we can use with the other equations, but there is a reason why we don't see a strong difference between the methods for this system. The main reason that it seems that each of the bootstrap methods work well for this noise in the system is because of the fact that the noise is normally distributed. So while the more advanced bootstrap methods can be used to clean data that has noise that is not normally distributed, they don't have much to improve for this method. Overall the best method is the standard replacement bootstrap, as it has the highest percent of passing simulations. Going forward the basic bootstrap will not perform as well, but when the noise is normally distributed it can be used, although it does not lead to a better outcome then a specific bootstrap method.
+
+# Heavy Tail Noise
+
+Moving onto the second noise that we added into our system is heavy tail noise. We again start by looking at the data to see if it seems still accurate.
+
+```{r}
+plot(dataTail[,1], dataTail[,2])
+```
+
+We can see that the data is still similar to the linear model it is based on, although it has more outliers than the normal distribution noise. We will again look at the confidence interval to check that it contains our real slope value.
+
+```{r}
+CITail = confint(lm(dataTail[,2] ~ dataTail[,1]))
+CITail[2,]
+```
+
+We can see that our true point lies in the confidence interval so we can use it for comparing the different bootstrap methods for heavy tail noise. We will now look at the histograms for the percentages of simulations in the confidence interval.
+
+```{r}
+ConfTailBoot = foreach(i = 1:sim, .combine = c) %do%{
+  mean(CITail[2,1] <= simTailBoot[,i] & simTailBoot[,i] <= CITail[2,2])
+}
+ConfTailBoot = ConfTailBoot * 100
+
+ConfTailPara = foreach(i = 1:sim, .combine = c) %do%{
+  mean(CITail[2,1] <= simTailPara[,i] & simTailPara[,i] <= CITail[2,2])
+}
+ConfTailPara = ConfTailPara * 100
+
+ConfTailRsam = foreach(i = 1:sim, .combine = c) %do%{
+  mean(CITail[2,1] <= simTailRsam[,i] & simTailRsam[,i] <= CITail[2,2])
+}
+ConfTailRsam = ConfTailRsam * 100
+
+ConfTailSmth = foreach(i = 1:sim, .combine = c) %do%{
+  mean(CITail[2,1] <= simTailSmth[,i] & simTailSmth[,i] <= CITail[2,2])
+}
+ConfTailSmth = ConfTailSmth * 100
+
+ConfTailWild = foreach(i = 1:sim, .combine = c) %do%{
+  mean(CITail[2,1] <= simTailWild[,i] & simTailWild[,i] <= CITail[2,2])
+}
+
+ConfTailWild = ConfTailWild * 100
+
+hist(ConfTailBoot, main = 'Percentages of NormBoot within CI')
+hist(ConfTailPara, main = 'Percentages of NormPara within CI')
+hist(ConfTailRsam, main = 'Percentages of NormRsam within CI')
+hist(ConfTailSmth, main = 'Percentages of NormSmth within CI')
+hist(ConfTailWild, main = 'Percentages of NormWild within CI')
+```
+
+```{r}
+cat(paste0(c("The average of TailBoot is: ", mean(ConfTailBoot), '\n')))
+cat(paste0(c("The average of TailPara is: ", mean(ConfTailPara), '\n')))
+cat(paste0(c("The average of TailRsam is: ", mean(ConfTailRsam), '\n')))
+cat(paste0(c("The average of TailSmth is: ", mean(ConfTailSmth), '\n')))
+cat(paste0(c("The average of TailWild is: ", mean(ConfTailWild), '\n')))
+
+cat(paste0(c("The range of TailBoot is: ", max(ConfTailBoot) - min(ConfTailBoot), '\n')))
+cat(paste0(c("The range of TailPara is: ", max(ConfTailPara) - min(ConfTailPara), '\n')))
+cat(paste0(c("The range of TailRsam is: ", max(ConfTailRsam) - min(ConfTailRsam), '\n')))
+cat(paste0(c("The range of TailSmth is: ", max(ConfTailSmth) - min(ConfTailSmth), '\n')))
+cat(paste0(c("The range of TailWild is: ", max(ConfTailWild) - min(ConfTailWild), '\n')))
+```
+
+Overall they all seem to be fairly similar, they each are around 95%, so they are all acceptable choices to use in this situation, and very similar to what we found in the last error. I would choose to go with the parametric model bootstrap method, since it is a model based approach, and with the heavy tail the data follows the linear model accurately except for some large outliers that the model based approach can better deal with than a regular resampling bootstrap.
+
+# Skewed Noise
+
+For the third simulation in this study we will be looking at data that has skewed noise. To start we will find the confidence interval and see what the graph with the noise looks like.
+
+```{r}
+plot(dataSkew[,1],dataSkew[,2], xlab = 'x', ylab = 'y with noise skew')
+```
+
+```{r}
+CISkew = confint(lm(dataSkew[,2] ~ dataSkew[,1]))
+CISkew[2,]
+```
+
+We can see that the data at the bottom follows the linear model, but the y values seem to be stretched upwards. While the data does look stretched higher than it normally would be we can see that 3 is still included in the overall confidence interval so it will work for comparisons. We will now generate our percents and compare each of the bootstrap models.
+
+```{r}
+ConfSkewBoot = foreach(i = 1:sim, .combine = c) %do%{
+  mean(CISkew[2,1] <= simSkewBoot[,i] & simSkewBoot[,i] <= CISkew[2,2])
+}
+ConfSkewBoot = ConfSkewBoot * 100
+
+ConfSkewPara = foreach(i = 1:sim, .combine = c) %do%{
+  mean(CISkew[2,1] <= simSkewPara[,i] & simSkewPara[,i] <= CISkew[2,2])
+}
+ConfSkewPara = ConfSkewPara * 100
+
+ConfSkewRsam = foreach(i = 1:sim, .combine = c) %do%{
+  mean(CISkew[2,1] <= simSkewRsam[,i] & simSkewRsam[,i] <= CISkew[2,2])
+}
+ConfSkewRsam = ConfSkewRsam * 100
+
+ConfSkewSmth = foreach(i = 1:sim, .combine = c) %do%{
+  mean(CISkew[2,1] <= simSkewSmth[,i] & simSkewSmth[,i] <= CISkew[2,2])
+}
+ConfSkewSmth = ConfSkewSmth * 100
+
+ConfSkewWild = foreach(i = 1:sim, .combine = c) %do%{
+  mean(CISkew[2,1] <= simSkewWild[,i] & simSkewWild[,i] <= CISkew[2,2])
+}
+
+ConfSkewWild = ConfSkewWild * 100
+
+hist(ConfSkewBoot, main = 'Percentages of SkewBoot within CI')
+hist(ConfSkewPara, main = 'Percentages of SkewPara within CI')
+hist(ConfSkewRsam, main = 'Percentages of SkewRsam within CI')
+hist(ConfSkewSmth, main = 'Percentages of SkewSmth within CI')
+hist(ConfSkewWild, main = 'Percentages of SkewWild within CI')
+```
+
+For the first time in the data we are starting to see what appears to be some bootstraps failing at generating data accurately. Quickly moving forward to look at the averages for each model.
+
+```{r}
+cat(paste0(c("The average of SkewBoot is: ", mean(ConfSkewBoot), '\n')))
+cat(paste0(c("The average of SkewPara is: ", mean(ConfSkewPara), '\n')))
+cat(paste0(c("The average of SkewRsam is: ", mean(ConfSkewRsam), '\n')))
+cat(paste0(c("The average of SkewSmth is: ", mean(ConfSkewSmth), '\n')))
+cat(paste0(c("The average of SkewWild is: ", mean(ConfSkewWild), '\n')))
+```
+
+This is the first major failure we have seen in the bootstrap algorithms against noise in a linear system. The best choice for the skewed data would be the smoothed bootstrap, since we are estimating how the noise effects each point. Smoothed bootstrap is the most intensive to code and computationally intensive. While it does have some drawbacks it is clear that it works well for data that has a large amount of noise in the system.
+
+# Heteroscedastic Noise
+
+Looking into the final simulation study at the effects of heteroscedastic noise. We once again start with plotting the function with the noise along with finding the confidence interval.
+
+```{r}
+plot(dataWide[,1],dataWide[,2], xlab = 'x', ylab = 'y with noise wide')
+```
+
+```{r}
+CISWide = confint(lm(dataWide[,2] ~ dataWide[,1]))
+CIWide[2,]
+```
+
+This data is by far the most interesting in terms of how it was effected by the noise. As x increases, y has a larger variance, although for smaller x values the plot is similar to the linear model that we are using. Since our confidence interval contains 3 we can use it to then compare the bootstrap methods. First we again will calculate the percentages of points within the confidence interval for each bootstrap method.
+
+```{r}
+ConfWideBoot = foreach(i = 1:sim, .combine = c) %do%{
+  mean(CIWide[2,1] <= simWideBoot[,i] & simWideBoot[,i] <= CIWide[2,2])
+}
+ConfWideBoot = ConfWideBoot * 100
+
+ConfWidePara = foreach(i = 1:sim, .combine = c) %do%{
+  mean(CIWide[2,1] <= simWidePara[,i] & simWidePara[,i] <= CIWide[2,2])
+}
+ConfWidePara = ConfWidePara * 100
+
+ConfWideRsam = foreach(i = 1:sim, .combine = c) %do%{
+  mean(CIWide[2,1] <= simWideRsam[,i] & simWideRsam[,i] <= CIWide[2,2])
+}
+ConfWideRsam = ConfWideRsam * 100
+
+ConfWideSmth = foreach(i = 1:sim, .combine = c) %do%{
+  mean(CIWide[2,1] <= simWideSmth[,i] & simWideSmth[,i] <= CIWide[2,2])
+}
+ConfWideSmth = ConfWideSmth * 100
+
+ConfWideWild = foreach(i = 1:sim, .combine = c) %do%{
+  mean(CIWide[2,1] <= simWideWild[,i] & simWideWild[,i] <= CIWide[2,2])
+}
+
+ConfWideWild = ConfWideWild * 100
+
+hist(ConfWideBoot, main = 'Percentages of WideBoot within CI')
+hist(ConfWidePara, main = 'Percentages of WidePara within CI')
+hist(ConfWideRsam, main = 'Percentages of WideRsam within CI')
+hist(ConfWideSmth, main = 'Percentages of WideSmth within CI')
+hist(ConfWideWild, main = 'Percentages of WideWild within CI')
+```
+
+For this final simulation we can start with the three bootstrap methods that do not work for this type of noise. The resampling bootstrap, error resampling bootstrap, and wild bootstrap do not work well for this set of data. The parametric bootstrap could be used, although the mean for it is slightly below 95%, so it technically wouldn't pass but it could be used in place of the smoothed bootstrap function as it is less computationally intensive so it can be used on a lighter framework. Overall the best choice though would be the smoothed bootstrap, since while it is computationally intensive, but it can more accurately estimate points based off the error estimate from the original.
+
+# Final words
+
+Looking over each of the bootstrap methods, we do see where some would have an advantage over the others, such as the smoothed bootstrap over the resampling bootstrap. While there are some advantages to using a bootstrap that can better estimate data, there are a few points to take into account. If the noise is similar to just randomness, it can be much harder to use a model based bootstrap since the algorithms cannot as accurately identify the parameters. On the other hand using a stronger bootstrap can help to identify noise in a system that can skew the observations to a degree that it can fail the other methods. At the end of the day there isn't a single method that will always be the best option to use, and as such you should test different bootstrap methods to figure out the best method for the system you are working on.

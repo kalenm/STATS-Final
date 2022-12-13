@@ -1,4 +1,9 @@
-setwd("C:/Users/Olympos/Documents/Programs/R/STATS-Final")
+if(.Platform$OS.type == 'unix'){ 
+  setwd("/Users/kalenmullin/Programming/R/Final/GitHub")
+}else{
+  setwd("C:/Users/Olympos/Documents/Programs/R/STATS-Final") 
+}
+
 library(doParallel)
 
 set.seed(87539319)
